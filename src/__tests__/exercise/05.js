@@ -35,6 +35,7 @@ const server = setupServer(...handlers)
 // 🐨 after all the tests, stop the server with `server.close()`
 beforeAll(() => server.listen())
 afterAll(() => server.close())
+afterEach(() => server.resetHandlers())
 
 test(`logging in displays the user's username`, async () => {
   render(<Login />)
@@ -66,4 +67,28 @@ test('trying to login without a password', async () => {
       password required
     </div>
   `)
+})
+
+test('handle one-off server errors', async () => {
+  const testErrorMessage = 'oh no, bad things going on'
+  server.use(
+    rest.post(
+      'https://auth-provider.example.com/api/login',
+      async (req, res, ctx) => {
+        return res(ctx.status(500), ctx.json({message: testErrorMessage}))
+      },
+    ),
+  )
+
+  render(<Login />)
+  const {username, password} = buildLoginForm()
+
+  userEvent.type(screen.getByLabelText(/username/i), username)
+  userEvent.type(screen.getByLabelText(/password/i), password)
+
+  userEvent.click(screen.getByRole('button', {name: /submit/i}))
+
+  await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i))
+
+  expect(screen.getByRole('alert')).toHaveTextContent(testErrorMessage)
 })
