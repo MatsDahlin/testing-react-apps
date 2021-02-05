@@ -58,5 +58,12 @@ test('trying to login without a password', async () => {
 
   await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i))
 
-  expect(screen.getByRole('alert')).toHaveTextContent(/password required/i)
+  expect(screen.getByRole('alert')).toMatchInlineSnapshot(`
+    <div
+      role="alert"
+      style="color: red;"
+    >
+      password required
+    </div>
+  `)
 })
