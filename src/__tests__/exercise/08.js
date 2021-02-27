@@ -6,6 +6,7 @@ import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import useCounter from '../../components/use-counter'
 import {act} from 'react-dom/test-utils'
+import {renderHook} from '@testing-library/react-hooks'
 
 function setup({initialProps} = {}) {
   let result = {}
@@ -19,36 +20,36 @@ function setup({initialProps} = {}) {
 }
 
 test('exposes the fake count and increment/decrement functions', () => {
-  let fakeResult = setup()
+  let {result} = renderHook(() => useCounter())
 
-  expect(fakeResult.current.count).toBe(0)
+  expect(result.current.count).toBe(0)
 
-  act(() => fakeResult.current.increment())
-  act(() => fakeResult.current.increment())
+  act(() => result.current.increment())
+  act(() => result.current.increment())
 
-  expect(fakeResult.current.count).toBe(2)
+  expect(result.current.count).toBe(2)
 })
 
 test('allows customization of the initial count', () => {
-  let fakeResult = setup({initialProps: {initialCount: 3}})
+  let {result} = renderHook(() => useCounter({initialCount: 3}))
 
-  expect(fakeResult.current.count).toBe(3)
+  expect(result.current.count).toBe(3)
 
-  act(() => fakeResult.current.increment())
-  act(() => fakeResult.current.increment())
+  act(() => result.current.increment())
+  act(() => result.current.increment())
 
-  expect(fakeResult.current.count).toBe(5)
+  expect(result.current.count).toBe(5)
 })
 
 test('allows customization of the step', () => {
-  let fakeResult = setup({initialProps: {step: 2}})
+  let {result} = renderHook(() => useCounter({step: 2}))
 
-  expect(fakeResult.current.count).toBe(0)
+  expect(result.current.count).toBe(0)
 
-  act(() => fakeResult.current.increment())
-  act(() => fakeResult.current.increment())
+  act(() => result.current.increment())
+  act(() => result.current.increment())
 
-  expect(fakeResult.current.count).toBe(4)
+  expect(result.current.count).toBe(4)
 })
 
 /* eslint no-unused-vars:0 */
