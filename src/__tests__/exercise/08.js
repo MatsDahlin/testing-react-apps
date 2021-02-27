@@ -7,56 +7,48 @@ import userEvent from '@testing-library/user-event'
 import useCounter from '../../components/use-counter'
 import {act} from 'react-dom/test-utils'
 
-// 🐨 create a simple function component that uses the useCounter hook
-// and then exposes some UI that our test can interact with to test the
-// capabilities of this hook
-// 💰 here's how to use the hook:
-// const {count, increment, decrement} = useCounter()
-const Counter = () => {
-  const {count, increment, decrement} = useCounter()
-
-  return (
-    <div>
-      <div>Count: {count}</div>
-      <button onClick={increment}>Increment</button>
-      <button onClick={decrement}>Decrement</button>
-    </div>
-  )
-}
-
-test('exposes the fake count and increment/decrement functions', () => {
-  let fakeResult
+function setup({initialProps} = {}) {
+  let result = {}
   const FakeCounter = () => {
-    fakeResult = useCounter()
+    result.current = useCounter(initialProps)
     return null
   }
 
   render(<FakeCounter />)
+  return result
+}
 
-  expect(fakeResult.count).toBe(0)
+test('exposes the fake count and increment/decrement functions', () => {
+  let fakeResult = setup()
 
-  act(() => fakeResult.increment())
-  act(() => fakeResult.increment())
+  expect(fakeResult.current.count).toBe(0)
 
-  expect(fakeResult.count).toBe(2)
+  act(() => fakeResult.current.increment())
+  act(() => fakeResult.current.increment())
+
+  expect(fakeResult.current.count).toBe(2)
 })
 
-test('exposes the count and increment/decrement functions', () => {
-  render(<Counter />)
+test('allows customization of the initial count', () => {
+  let fakeResult = setup({initialProps: {initialCount: 3}})
 
-  const countElement = screen.getByText(/count:/i)
-  const incButton = screen.getByRole('button', {name: /increment/i})
-  const decButton = screen.getByRole('button', {name: /decrement/i})
+  expect(fakeResult.current.count).toBe(3)
 
-  expect(countElement).toHaveTextContent('Count: 0')
-  userEvent.click(incButton)
-  userEvent.click(incButton)
+  act(() => fakeResult.current.increment())
+  act(() => fakeResult.current.increment())
 
-  expect(countElement).toHaveTextContent('Count: 2')
+  expect(fakeResult.current.count).toBe(5)
+})
 
-  userEvent.click(decButton)
+test('allows customization of the step', () => {
+  let fakeResult = setup({initialProps: {step: 2}})
 
-  expect(countElement).toHaveTextContent('Count: 1')
+  expect(fakeResult.current.count).toBe(0)
+
+  act(() => fakeResult.current.increment())
+  act(() => fakeResult.current.increment())
+
+  expect(fakeResult.current.count).toBe(4)
 })
 
 /* eslint no-unused-vars:0 */
