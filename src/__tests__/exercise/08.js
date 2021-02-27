@@ -5,6 +5,7 @@ import * as React from 'react'
 import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import useCounter from '../../components/use-counter'
+import {act} from 'react-dom/test-utils'
 
 // 🐨 create a simple function component that uses the useCounter hook
 // and then exposes some UI that our test can interact with to test the
@@ -22,6 +23,23 @@ const Counter = () => {
     </div>
   )
 }
+
+test('exposes the fake count and increment/decrement functions', () => {
+  let fakeResult
+  const FakeCounter = () => {
+    fakeResult = useCounter()
+    return null
+  }
+
+  render(<FakeCounter />)
+
+  expect(fakeResult.count).toBe(0)
+
+  act(() => fakeResult.increment())
+  act(() => fakeResult.increment())
+
+  expect(fakeResult.count).toBe(2)
+})
 
 test('exposes the count and increment/decrement functions', () => {
   render(<Counter />)
